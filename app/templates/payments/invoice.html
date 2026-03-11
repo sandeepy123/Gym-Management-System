@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Invoice #{{ payment.id }}</title>
+    <!-- Modern Google Font -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            color: #111827;
+            background: #f3f4f6;
+            margin: 0;
+            padding: 2rem;
+            display: flex;
+            justify-content: center;
+        }
+
+        .invoice-box {
+            max-width: 800px;
+            width: 100%;
+            background: #fff;
+            padding: 3rem;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            border-bottom: 2px solid #e5e7eb;
+            padding-bottom: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .gym-info h1 {
+            margin: 0 0 0.5rem 0;
+            color: #4F46E5;
+            font-size: 2rem;
+            letter-spacing: -0.5px;
+        }
+
+        .gym-info p {
+            margin: 0;
+            color: #6b7280;
+            font-size: 0.875rem;
+            line-height: 1.5;
+        }
+
+        .invoice-details {
+            text-align: right;
+        }
+
+        .invoice-details h2 {
+            margin: 0 0 0.5rem 0;
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: #374151;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .invoice-details p {
+            margin: 0 0 0.25rem 0;
+            font-size: 0.875rem;
+            color: #4b5563;
+        }
+
+        .customer-info {
+            margin-bottom: 2rem;
+        }
+
+        .customer-info h3 {
+            margin: 0 0 0.5rem 0;
+            font-size: 1rem;
+            color: #6b7280;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .customer-info p {
+            margin: 0;
+            font-size: 1rem;
+            font-weight: 500;
+            line-height: 1.5;
+        }
+        
+        .customer-info .sub-text {
+            font-weight: normal;
+            color: #4b5563;
+            font-size: 0.875rem;
+        }
+
+        table {
+            width: 100%;
+            line-height: inherit;
+            text-align: left;
+            border-collapse: collapse;
+        }
+
+        table th {
+            padding: 0.75rem 1rem;
+            background: #f9fafb;
+            border-bottom: 2px solid #e5e7eb;
+            color: #374151;
+            font-weight: 600;
+            font-size: 0.875rem;
+        }
+
+        table td {
+            padding: 1rem;
+            border-bottom: 1px solid #e5e7eb;
+            font-size: 0.875rem;
+        }
+
+        .total-row td {
+            font-weight: 700;
+            font-size: 1.125rem;
+            color: #111827;
+            border-bottom: none;
+            padding-top: 1.5rem;
+        }
+
+        .footer {
+            margin-top: 3rem;
+            text-align: center;
+            color: #6b7280;
+            font-size: 0.875rem;
+            border-top: 1px solid #e5e7eb;
+            padding-top: 1.5rem;
+        }
+
+        .print-btn {
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            background: #4F46E5;
+            color: white;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 9999px;
+            font-size: 1rem;
+            font-weight: 500;
+            cursor: pointer;
+            box-shadow: 0 4px 6px rgba(79, 70, 229, 0.3);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: transform 0.2s, background 0.2s;
+        }
+
+        .print-btn:hover {
+            background: #4338CA;
+            transform: translateY(-2px);
+        }
+
+        @media print {
+            body {
+                background: white;
+                padding: 0;
+            }
+            .invoice-box {
+                box-shadow: none;
+                max-width: 100%;
+                padding: 0;
+            }
+            .print-btn {
+                display: none;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="invoice-box">
+        <div class="header">
+            <div class="gym-info">
+                <h1>{{ gym.name }}</h1>
+                <p>{{ gym.address }}</p>
+                <p>{{ gym.city }}</p>
+                <p>{{ gym.phone }} | {{ gym.email }}</p>
+            </div>
+            <div class="invoice-details">
+                <h2>Invoice</h2>
+                <p><strong>Invoice No:</strong> INV-{{ '%05d' % payment.id }}</p>
+                <p><strong>Date:</strong> {{ payment.payment_date.strftime('%B %d, %Y') }}</p>
+            </div>
+        </div>
+
+        <div class="customer-info">
+            <h3>Billed To</h3>
+            {% if member %}
+            <p>{{ member.full_name }}</p>
+            <p class="sub-text">{{ member.phone }}</p>
+            {% if member.email %}<p class="sub-text">{{ member.email }}</p>{% endif %}
+            {% else %}
+            <p>Walk-in / Unknown</p>
+            {% endif %}
+        </div>
+
+        <table>
+            <thead>
+                <tr>
+                    <th>Description</th>
+                    <th style="text-align: right;">Amount</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>
+                        Gym Membership Payment - {{ payment.type }}
+                        {% if member and member.plan %}
+                        <br><small style="color: #6b7280;">{{ member.plan.name }} Plan</small>
+                        {% endif %}
+                    </td>
+                    <td style="text-align: right;">₹{{ payment.amount }}</td>
+                </tr>
+                <tr class="total-row">
+                    <td style="text-align: right;">Total Paid</td>
+                    <td style="text-align: right;">₹{{ payment.amount }}</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <div class="footer">
+            <p>Thank you for your business! Have a great workout.</p>
+        </div>
+    </div>
+
+    <button class="print-btn" onclick="window.print()">
+        <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"></path></svg>
+        Print Invoice
+    </button>
+
+</body>
+</html>

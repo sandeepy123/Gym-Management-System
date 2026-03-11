@@ -1,0 +1,213 @@
+{% extends "base.html" %}
+
+{% block page_title %}Dashboard{% endblock %}
+
+{% block content %}
+<style>
+    .dashboard-section {
+        margin-bottom: 2.5rem;
+    }
+    .section-title {
+        font-size: 1.25rem;
+        font-weight: 600;
+        color: var(--text-main);
+        margin-bottom: 1rem;
+        padding-bottom: 0.5rem;
+        border-bottom: 2px solid #E5E7EB;
+    }
+    .dashboard-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 1.5rem;
+    }
+    .stat-card {
+        padding: 1.5rem;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        position: relative;
+        overflow: hidden;
+    }
+    .stat-card-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        margin-bottom: 1rem;
+    }
+    .stat-card-title {
+        color: var(--text-muted);
+        font-size: 0.875rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+    }
+    .stat-card-icon {
+        width: 24px;
+        height: 24px;
+        color: currentColor;
+        opacity: 0.8;
+    }
+    .stat-card-value {
+        font-size: 2rem;
+        font-weight: 700;
+        color: var(--text-main);
+    }
+    
+    /* Specific colors for specific stats */
+    .stat-primary .stat-card-value { color: #3B82F6; /* Blue */ }
+    .stat-primary .stat-card-title { color: #60A5FA; }
+    .stat-primary .stat-card-icon { color: #3B82F6; }
+
+    .stat-success .stat-card-value { color: #10B981; /* Green */ }
+    .stat-success .stat-card-title { color: #34D399; }
+    .stat-success .stat-card-icon { color: #10B981; }
+
+    .stat-warning .stat-card-value { color: #F59E0B; /* Orange */ }
+    .stat-warning .stat-card-title { color: #FBBF24; }
+    .stat-warning .stat-card-icon { color: #F59E0B; }
+
+    .stat-danger .stat-card-value { color: #EF4444; /* Red */ }
+    .stat-danger .stat-card-title { color: #F87171; }
+    .stat-danger .stat-card-icon { color: #EF4444; }
+
+    /* Decorative background shape */
+    .stat-card::after {
+        content: '';
+        position: absolute;
+        bottom: -20%;
+        right: -10%;
+        width: 100px;
+        height: 100px;
+        border-radius: 50%;
+        background: currentColor;
+        opacity: 0.05;
+        z-index: 0;
+    }
+    .stat-card-content {
+        position: relative;
+        z-index: 1;
+    }
+</style>
+
+<!-- 1. Members Overview Section -->
+<div class="dashboard-section">
+    <h2 class="section-title">Members Overview</h2>
+    <div class="dashboard-grid">
+        <div class="card stat-card stat-primary">
+            <div class="stat-card-content">
+                <div class="stat-card-header">
+                    <div class="stat-card-title">Total Members</div>
+                    <svg class="stat-card-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="十七 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path></svg>
+                </div>
+                <div class="stat-card-value">{{ total_members }}</div>
+            </div>
+        </div>
+
+        <div class="card stat-card stat-primary">
+            <div class="stat-card-content">
+                <div class="stat-card-header">
+                    <div class="stat-card-title">Attendance Today</div>
+                    <svg class="stat-card-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                </div>
+                <div class="stat-card-value">{{ attendance_today }}</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 2. Revenue Statistics Section -->
+<div class="dashboard-section">
+    <h2 class="section-title">Revenue Statistics</h2>
+    <div class="dashboard-grid">
+        <div class="card stat-card stat-success">
+            <div class="stat-card-content">
+                <div class="stat-card-header">
+                    <div class="stat-card-title">Today Collection (₹)</div>
+                    <svg class="stat-card-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                </div>
+                <div class="stat-card-value">₹{{ "%.2f"|format(today_collection) }}</div>
+            </div>
+        </div>
+
+        <div class="card stat-card stat-success">
+            <div class="stat-card-content">
+                <div class="stat-card-header">
+                    <div class="stat-card-title">Monthly Collection (₹)</div>
+                    <svg class="stat-card-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path></svg>
+                </div>
+                <div class="stat-card-value">₹{{ "%.2f"|format(monthly_collection) }}</div>
+            </div>
+        </div>
+
+        <div class="card stat-card stat-success">
+            <div class="stat-card-content">
+                <div class="stat-card-header">
+                    <div class="stat-card-title">Yearly Collection (₹)</div>
+                    <svg class="stat-card-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"></path></svg>
+                </div>
+                <div class="stat-card-value">₹{{ "%.2f"|format(yearly_collection) }}</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 3. Membership Activity Section -->
+<div class="dashboard-section">
+    <h2 class="section-title">Membership Activity</h2>
+    <div class="dashboard-grid">
+        <div class="card stat-card stat-primary">
+            <div class="stat-card-content">
+                <div class="stat-card-header">
+                    <div class="stat-card-title">Today Renewals / Admins</div>
+                    <svg class="stat-card-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>
+                </div>
+                <div class="stat-card-value">{{ today_renewal_count }}</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 4. Alerts / Warnings Section -->
+<div class="dashboard-section">
+    <h2 class="section-title">Alerts & Warnings</h2>
+    <div class="dashboard-grid">
+        <div class="card stat-card stat-danger">
+            <div class="stat-card-content">
+                <div class="stat-card-header">
+                    <div class="stat-card-title">Plans Expired</div>
+                    <svg class="stat-card-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                </div>
+                <div class="stat-card-value">{{ expired_members }}</div>
+            </div>
+        </div>
+        
+        <a href="{{ url_for('members.list_members', filter='expiring_soon') }}" style="text-decoration: none;">
+            <div class="card stat-card stat-warning" style="height: 100%;">
+                <div class="stat-card-content">
+                    <div class="stat-card-header">
+                        <div class="stat-card-title">Expiring Soon (7 days)</div>
+                        <svg class="stat-card-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
+                    </div>
+                    <div class="stat-card-value">{{ expiring_soon_members }}</div>
+                </div>
+            </div>
+        </a>
+    </div>
+</div>
+
+<div class="card" style="margin-top: 2rem;">
+    <h3 style="margin-bottom: 1rem; color: var(--text-main);">Quick Action Shortcuts</h3>
+    <div style="display: flex; gap: 1rem; flex-wrap: wrap;">
+        <a href="{{ url_for('members.add_member') }}" class="btn btn-primary">Add New Member</a>
+        <a href="{{ url_for('attendance.index') }}" class="btn" style="background-color: var(--success); color: white;">Mark Attendance</a>
+        <a href="{{ url_for('members.list_members', filter='expiring_soon') }}" class="btn" style="background-color: var(--warning); color: white;">View Expiring Members</a>
+    </div>
+</div>
+
+<!-- Placeholder Modal function for illustration -->
+<script>
+    function openExpenseModal() {
+        alert('Expense Modal placeholder - In a full implementation this would open a popup box.');
+    }
+</script>
+{% endblock %}

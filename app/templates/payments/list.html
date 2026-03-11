@@ -1,0 +1,61 @@
+{% extends "base.html" %}
+
+{% block page_title %}Payment History{% endblock %}
+
+{% block content %}
+<div class="card" style="margin-bottom: 2rem;">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+        <h2 style="font-size: 1.25rem;">All Payments</h2>
+    </div>
+
+    <div style="overflow-x: auto;">
+        <table style="width: 100%; border-collapse: collapse; text-align: left;">
+            <thead>
+                <tr style="border-bottom: 2px solid #E5E7EB; color: var(--text-muted); font-size: 0.875rem;">
+                    <th style="padding: 1rem 0.5rem;">Payment ID</th>
+                    <th style="padding: 1rem 0.5rem;">Date</th>
+                    <th style="padding: 1rem 0.5rem;">Member</th>
+                    <th style="padding: 1rem 0.5rem;">Type</th>
+                    <th style="padding: 1rem 0.5rem;">Amount (₹)</th>
+                    <th style="padding: 1rem 0.5rem; text-align: center;">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for payment in payments %}
+                <tr style="border-bottom: 1px solid #E5E7EB;">
+                    <td style="padding: 1rem 0.5rem;">#{{ payment.id }}</td>
+                    <td style="padding: 1rem 0.5rem;">{{ payment.payment_date.strftime('%Y-%m-%d') }}</td>
+                    <td style="padding: 1rem 0.5rem; font-weight: 500;">
+                        {% if payment.member %}
+                            {{ payment.member.full_name }}
+                            <br><small style="color: var(--text-muted); font-weight: normal;">{{ payment.member.phone }}</small>
+                        {% else %}
+                            <span style="color: var(--text-muted);">Unknown Member</span>
+                        {% endif %}
+                    </td>
+                    <td style="padding: 1rem 0.5rem;">
+                        <span style="background: #E0E7FF; color: var(--primary); padding: 0.25rem 0.75rem; border-radius: 9999px; font-size: 0.75rem; font-weight: 600;">
+                            {{ payment.type }}
+                        </span>
+                    </td>
+                    <td style="padding: 1rem 0.5rem; font-weight: 600;">{{ payment.amount }}</td>
+                    <td style="padding: 1rem 0.5rem; text-align: center;">
+                        <a href="{{ url_for('payments.invoice', payment_id=payment.id) }}" class="btn" target="_blank" style="padding: 0.5rem 1rem; font-size: 0.875rem; background: var(--bg-color); border: 1px solid #D1D5DB; color: var(--text-main); text-decoration: none; display: inline-flex; align-items: center; gap: 0.5rem;">
+                            <!-- SVG for document/invoice -->
+                            <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+                            Invoice
+                        </a>
+                    </td>
+                </tr>
+                {% else %}
+                <tr>
+                    <td colspan="6" style="padding: 2rem; text-align: center; color: var(--text-muted);">
+                        No payments found.
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,82 @@
+{% extends "base.html" %}
+
+{% block page_title %}{{ member.full_name }}'s Attendance History{% endblock %}
+
+{% block content %}
+<div class="card" style="margin-bottom: 2rem;">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+        <div>
+            <h2 style="font-size: 1.25rem;">Attendance Records</h2>
+            <p style="color: var(--text-muted); font-size: 0.875rem; margin-top: 0.25rem;">
+                Member ID: #{{ member.id }} | 
+                Contact: {{ member.phone }}
+            </p>
+        </div>
+        <a href="{{ url_for('members.list_members') }}" class="btn" style="background: var(--bg-color); border: 1px solid #D1D5DB; color: var(--text-main); text-decoration: none;">
+            &larr; Back to Members
+        </a>
+    </div>
+
+    <div style="overflow-x: auto;">
+        <table style="width: 100%; border-collapse: collapse; text-align: left;">
+            <thead>
+                <tr style="border-bottom: 2px solid #E5E7EB; color: var(--text-muted); font-size: 0.875rem;">
+                    <th style="padding: 1rem 0.5rem;">Date</th>
+                    <th style="padding: 1rem 0.5rem;">Check-in Time</th>
+                    <th style="padding: 1rem 0.5rem;">Check-out Time</th>
+                    <th style="padding: 1rem 0.5rem;">Duration</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for record in records %}
+                <tr style="border-bottom: 1px solid #E5E7EB;">
+                    <td style="padding: 1rem 0.5rem; font-weight: 500;">
+                        {{ record.date.strftime('%B %d, %Y') }}
+                    </td>
+                    <td style="padding: 1rem 0.5rem;">
+                        <span style="background: #D1FAE5; color: var(--success); padding: 0.25rem 0.75rem; border-radius: 9999px; font-size: 0.75rem; font-weight: 600;">
+                            {{ record.entry_time.strftime('%I:%M %p') }}
+                        </span>
+                    </td>
+                    <td style="padding: 1rem 0.5rem;">
+                        {% if record.exit_time %}
+                        <span style="background: #FEE2E2; color: var(--danger); padding: 0.25rem 0.75rem; border-radius: 9999px; font-size: 0.75rem; font-weight: 600;">
+                            {{ record.exit_time.strftime('%I:%M %p') }}
+                        </span>
+                        {% else %}
+                        <span style="color: var(--text-muted); font-size: 0.875rem;">Not checked out</span>
+                        {% endif %}
+                    </td>
+                    <td style="padding: 1rem 0.5rem;">
+                        {% if record.exit_time %}
+                            {% set start = record.entry_time.hour * 60 + record.entry_time.minute %}
+                            {% set end = record.exit_time.hour * 60 + record.exit_time.minute %}
+                            {% set mins = end - start %}
+                            {% if mins < 0 %}
+                                {% set mins = mins + 1440 %}
+                            {% endif %}
+                            {% set hours = mins // 60 %}
+                            {% set remaining_mins = mins % 60 %}
+                            
+                            {% if hours > 0 %}
+                                {{ hours }}h {{ remaining_mins }}m
+                            {% else %}
+                                {{ remaining_mins }}m
+                            {% endif %}
+                        {% else %}
+                            -
+                        {% endif %}
+                    </td>
+                </tr>
+                {% else %}
+                <tr>
+                    <td colspan="4" style="padding: 2rem; text-align: center; color: var(--text-muted);">
+                        No attendance records found for this member.
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

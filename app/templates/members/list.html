@@ -1,0 +1,142 @@
+{% extends "base.html" %}
+
+{% block page_title %}Members Directory{% endblock %}
+
+{% block content %}
+<div class="card" style="margin-bottom: 2rem;">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+        <h2 style="font-size: 1.25rem;">Latest Members</h2>
+        <div>
+            <a href="{{ url_for('members.add_member') }}" class="btn btn-primary">+ New Member</a>
+        </div>
+    </div>
+
+    <div style="overflow-x: auto;">
+        <table style="width: 100%; border-collapse: collapse; text-align: left;">
+            <thead>
+                <tr style="border-bottom: 2px solid #E5E7EB; color: var(--text-muted); font-size: 0.875rem;">
+                    <th style="padding: 1rem 0.5rem;">ID</th>
+                    <th style="padding: 1rem 0.5rem;">Name</th>
+                    <th style="padding: 1rem 0.5rem;">Contact</th>
+                    <th style="padding: 1rem 0.5rem;">Plan</th>
+                    <th style="padding: 1rem 0.5rem;">Expiry</th>
+                    <th style="padding: 1rem 0.5rem;">Status</th>
+                    <th style="padding: 1rem 0.5rem;">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for member in members %}
+                <tr style="border-bottom: 1px solid #E5E7EB;">
+                    <td style="padding: 1rem 0.5rem;">#{{ member.id }}</td>
+                    <td style="padding: 1rem 0.5rem; font-weight: 500;">{{ member.full_name }}</td>
+                    <td style="padding: 1rem 0.5rem;">
+                        {{ member.phone }}<br>
+                        <small style="color: var(--text-muted)">{{ member.email }}</small>
+                    </td>
+                    <td style="padding: 1rem 0.5rem;">
+                        {{ member.plan.name if member.plan else 'N/A' }}
+                    </td>
+                    <td style="padding: 1rem 0.5rem;">
+                        {{ member.plan_expiry_date.strftime('%Y-%m-%d') if member.plan_expiry_date else 'N/A' }}
+                    </td>
+                    <td style="padding: 1rem 0.5rem;">
+                        {% set status = member.status %}
+                        {% if status == 'Active' %}
+                            <span style="background: #D1FAE5; color: var(--success); padding: 0.25rem 0.75rem; border-radius: 9999px; font-size: 0.75rem; font-weight: 600;">Active</span>
+                        {% elif status == 'Plan Expiring Soon' %}
+                            <span style="background: #FEF3C7; color: var(--warning); padding: 0.25rem 0.75rem; border-radius: 9999px; font-size: 0.75rem; font-weight: 600;">Expiring Soon</span>
+                        {% else %}
+                            <span style="background: #FEE2E2; color: var(--danger); padding: 0.25rem 0.75rem; border-radius: 9999px; font-size: 0.75rem; font-weight: 600;">Expired</span>
+                        {% endif %}
+                    </td>
+                    <td style="padding: 1rem 0.5rem;">
+                        <div style="display: flex; flex-direction: column; gap: 0.5rem;">
+                            <button onclick="openRenewModal({{ member.id }}, '{{ member.full_name }}')" 
+                            class="btn" 
+                            style="padding: 0.5rem 1rem; font-size: 0.875rem; background: var(--bg-color); border: 1px solid #D1D5DB; color: var(--text-main);">
+                            Renew/Update
+                            </button>
+                            <a href="{{ url_for('members.attendance_history', id=member.id) }}" 
+                               class="btn" 
+                               style="padding: 0.5rem 1rem; font-size: 0.875rem; background: #E0E7FF; border: 1px solid #C7D2FE; color: var(--primary); text-decoration: none; text-align: center;">
+                                View Attendance
+                            </a>
+                            {% if status in ['Plan Expiring Soon', 'Expired'] %}
+                            <form method="POST" action="{{ url_for('members.send_reminder', id=member.id) }}" style="margin: 0;">
+                                <button type="submit" class="btn" style="padding: 0.5rem 1rem; font-size: 0.875rem; background: var(--warning); color: white; border: none; width: 100%;">
+                                Send Reminder
+                                </button>
+                            </form>
+                            {% set last_reminder = member.reminders.first() %}
+                            {% if last_reminder %}
+                            <small style="color: var(--text-muted); font-size: 0.75rem;">Last sent: {{ last_reminder.date_sent.strftime('%b %d, %Y') }}</small>
+                            {% endif %}
+                            {% endif %}
+                        </div>
+                    </td>
+                </tr>
+                {% else %}
+                <tr>
+                    <td colspan="7" style="padding: 2rem; text-align: center; color: var(--text-muted);">
+                        No members found. Add some!
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- Renew Modal -->
+<div id="renewModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000; justify-content: center; align-items: center;">
+    <div class="card" style="width: 100%; max-width: 400px;">
+        <h3 style="margin-bottom: 1rem;">Update Plan for <span id="modalMemberName" style="color: var(--primary);"></span></h3>
+        <form id="renewForm" method="POST" action="">
+            <div class="form-group">
+                <label>Select New Plan</label>
+                <select name="new_plan_id" class="form-control" required onchange="updatePrice(this)">
+                    <option value="">-- Select Plan --</option>
+                    {% for plan in plans %}
+                    <option value="{{ plan.id }}" data-price="{{ plan.price }}">
+                        {{ plan.name }} ({{ plan.duration_days }} days) - ₹{{ plan.price }}
+                    </option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label>Amount Collected (₹)</label>
+                <input type="number" id="paymentAmount" name="payment_amount" class="form-control" step="0.01" required>
+            </div>
+
+            <div style="display: flex; gap: 1rem; margin-top: 1.5rem;">
+                <button type="submit" class="btn btn-primary" style="flex: 1;">Confirm Update</button>
+                <button type="button" class="btn" style="flex: 1; background: var(--bg-color); border: 1px solid #D1D5DB;" onclick="closeRenewModal()">Cancel</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+function openRenewModal(memberId, memberName) {
+    document.getElementById('renewModal').style.display = 'flex';
+    document.getElementById('modalMemberName').textContent = memberName;
+    document.getElementById('renewForm').action = '/members/' + memberId + '/update_plan';
+}
+
+function closeRenewModal() {
+    document.getElementById('renewModal').style.display = 'none';
+    document.getElementById('renewForm').reset();
+}
+
+function updatePrice(selectElem) {
+    const option = selectElem.options[selectElem.selectedIndex];
+    if(option && option.dataset.price) {
+        document.getElementById('paymentAmount').value = option.dataset.price;
+    } else {
+        document.getElementById('paymentAmount').value = '';
+    }
+}
+</script>
+
+{% endblock %}
